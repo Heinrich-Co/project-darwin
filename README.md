@@ -110,14 +110,14 @@ project-darwin/
 
 | # | Skill | Input | Output | Time |
 |---|-------|-------|--------|------|
-| 1 | Brand Guardian | Any content | Validation result | instant |
-| 2 | Strategy Expert | Snoika keyword | Strategic brief (3 angles) | 2 min |
-| 3 | Content Writer | Brief | 2400-word blog post | 15 min |
-| 4 | Social Creator | Blog data | 5+ platform-specific posts | 10 min |
-| 5 | Visual Designer | Blog data | 5 Nano Banana prompts | 5 min |
-| 6 | Lead Qualifier | Lead list | Scored & staged leads | 2 min |
-| 7 | Analytics Manager | Metrics data | KPI report + actions | 5 min |
-| 8 | LinkedIn Optimizer | Pillar + topic | Camila's editorial post | 5 min |
+| 1 | Brand Guardian | Any content | Validation result |
+| 2 | Strategy Expert | Snoika keyword | Strategic brief (3 angles) |
+| 3 | Content Writer | Brief | 2400-word blog post |
+| 4 | Social Creator | Blog data | 5+ platform-specific posts | 
+| 5 | Visual Designer | Blog data | 5 Nano Banana prompts |
+| 6 | Lead Qualifier | Lead list | Scored & staged leads |
+| 7 | Analytics Manager | Metrics data | KPI report + actions | 
+| 8 | LinkedIn Optimizer | Pillar + topic | Camila's editorial post |
 
 ## Tech Stack
 
