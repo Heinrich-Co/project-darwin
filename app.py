@@ -21,11 +21,12 @@ POST /api/full-pipeline      Full end-to-end pipeline
 import os
 import logging
 from datetime import datetime
+from pathlib import Path
 
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env")
 
 from handlers import handler  # noqa: E402 (must be after load_dotenv)
 
