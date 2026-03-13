@@ -2,7 +2,7 @@
 
 An AI-powered content automation system that transforms how Heinrich Co. creates marketing content, qualifies leads, and measures performance.
 
-**20x faster** content creation · **95% cost reduction** · **8 AI Skills** working together
+**20x faster** content creation · **95% cost reduction** · **8 AI Skills** powered by Claude API
 
 ---
 
@@ -23,7 +23,8 @@ pip install -r requirements.txt
 
 # 4. Configure
 cp .env.example .env
-# Edit .env and add your ANTHROPIC_API_KEY
+notepad .env
+# Add your ANTHROPIC_API_KEY and save
 
 # 5. Run
 python app.py
@@ -32,50 +33,47 @@ python app.py
 
 ## Test Endpoints
 
+All endpoints support `"use_ai": true` for Claude-enhanced content.
+
 ```bash
 # Health check
 curl http://127.0.0.1:5000/
 
 # Generate strategic brief (Skill #2)
-curl -X POST http://127.0.0.1:5000/api/generate-brief \
-  -H "Content-Type: application/json" \
-  -d '{"keyword":"consulting services it"}'
+curl -X POST http://127.0.0.1:5000/api/generate-brief -H "Content-Type: application/json" -d "{\"keyword\":\"consulting services it\",\"use_ai\":true}"
 
 # Write blog post (Skill #3)
-curl -X POST http://127.0.0.1:5000/api/write-blog \
-  -H "Content-Type: application/json" \
-  -d '{"keyword":"consulting services it"}'
+curl -X POST http://127.0.0.1:5000/api/write-blog -H "Content-Type: application/json" -d "{\"keyword\":\"consulting services it\",\"use_ai\":true}"
 
 # Create social posts (Skill #4)
-curl -X POST http://127.0.0.1:5000/api/create-social \
-  -H "Content-Type: application/json" \
-  -d '{"keyword":"consulting services it","platform":"linkedin"}'
+curl -X POST http://127.0.0.1:5000/api/create-social -H "Content-Type: application/json" -d "{\"keyword\":\"consulting services it\",\"platform\":\"linkedin\",\"use_ai\":true}"
 
 # Generate design prompts (Skill #5)
-curl -X POST http://127.0.0.1:5000/api/design-visuals \
-  -H "Content-Type: application/json" \
-  -d '{"keyword":"consulting services it","title":"IT Consulting Guide"}'
+curl -X POST http://127.0.0.1:5000/api/design-visuals -H "Content-Type: application/json" -d "{\"keyword\":\"consulting services it\",\"title\":\"IT Consulting Guide\"}"
 
 # Qualify leads (Skill #6)
-curl -X POST http://127.0.0.1:5000/api/qualify-leads \
-  -H "Content-Type: application/json" \
-  -d '{"leads":[{"name":"Jenny Cohen","company":"Air Doctor","title":"CEO","source":"presto","buying_signal_score":8}]}'
+curl -X POST http://127.0.0.1:5000/api/qualify-leads -H "Content-Type: application/json" -d "{\"leads\":[{\"name\":\"Jenny Cohen\",\"company\":\"Air Doctor\",\"title\":\"CEO\",\"source\":\"presto\",\"buying_signal_score\":8}]}"
 
 # Analytics report (Skill #7)
-curl -X POST http://127.0.0.1:5000/api/analytics-report \
-  -H "Content-Type: application/json" \
-  -d '{"period":"daily","content_pages":9,"total_views":14,"total_leads":179,"hot_leads":24}'
+curl -X POST http://127.0.0.1:5000/api/analytics-report -H "Content-Type: application/json" -d "{\"period\":\"daily\",\"content_pages\":9,\"total_views\":14,\"total_leads\":179,\"hot_leads\":24}"
 
 # LinkedIn post (Skill #8)
-curl -X POST http://127.0.0.1:5000/api/linkedin-post \
-  -H "Content-Type: application/json" \
-  -d '{"pillar":"structural_intelligence"}'
+curl -X POST http://127.0.0.1:5000/api/linkedin-post -H "Content-Type: application/json" -d "{\"pillar\":\"structural_intelligence\",\"use_ai\":true}"
 
 # Full pipeline — end-to-end for one keyword
-curl -X POST http://127.0.0.1:5000/api/full-pipeline \
-  -H "Content-Type: application/json" \
-  -d '{"keyword":"consulting services it"}'
+curl -X POST http://127.0.0.1:5000/api/full-pipeline -H "Content-Type: application/json" -d "{\"keyword\":\"consulting services it\",\"use_ai\":true}"
 ```
+
+## How AI Enhancement Works
+
+Every content endpoint accepts `"use_ai": true`:
+
+| Mode | What happens | Speed |
+|------|-------------|-------|
+| `"use_ai": false` (default) | Template-based output from built-in skill logic | Instant |
+| `"use_ai": true` | Claude API generates rich, unique content | 5-15 sec |
+
+When `use_ai` is true, the response includes `"ai_enhanced": true` and `"ai_content"` with Claude-generated text alongside the template output.
 
 ## Project Structure
 
@@ -84,6 +82,7 @@ project-darwin/
 ├── app.py                        # Main Flask application (all endpoints)
 ├── requirements.txt              # Python dependencies (Python 3.12 compatible)
 ├── .env.example                  # Environment variable template
+├── .env                          # Your API keys (not in git)
 ├── Dockerfile                    # Container config for Railway
 ├── railway.toml                  # Railway deployment settings
 ├── .gitignore
@@ -108,21 +107,21 @@ project-darwin/
 
 ## The 8 Skills
 
-| # | Skill | Input | Output | Time |
-|---|-------|-------|--------|------|
-| 1 | Brand Guardian | Any content | Validation result |
-| 2 | Strategy Expert | Snoika keyword | Strategic brief (3 angles) |
-| 3 | Content Writer | Brief | 2400-word blog post |
-| 4 | Social Creator | Blog data | 5+ platform-specific posts | 
-| 5 | Visual Designer | Blog data | 5 Nano Banana prompts |
-| 6 | Lead Qualifier | Lead list | Scored & staged leads |
-| 7 | Analytics Manager | Metrics data | KPI report + actions | 
-| 8 | LinkedIn Optimizer | Pillar + topic | Camila's editorial post |
+| # | Skill | Input | Output | AI Enhanced |
+|---|-------|-------|--------|-------------|
+| 1 | Brand Guardian | Any content | Validation result | No (rule-based) |
+| 2 | Strategy Expert | Snoika keyword | Strategic brief (3 angles) | Yes |
+| 3 | Content Writer | Brief | 2400-word blog post | Yes |
+| 4 | Social Creator | Blog data | 5+ platform-specific posts | Yes |
+| 5 | Visual Designer | Blog data | 5 Nano Banana prompts | No (prompts only) |
+| 6 | Lead Qualifier | Lead list | Scored & staged leads | No (rule-based) |
+| 7 | Analytics Manager | Metrics data | KPI report + actions | No (data-driven) |
+| 8 | LinkedIn Optimizer | Pillar + topic | Camila's editorial post | Yes |
 
 ## Tech Stack
 
 - **Framework:** Flask 3.0 (Python 3.12)
-- **AI Engine:** Claude API (Anthropic)
+- **AI Engine:** Claude API (Anthropic) — claude-sonnet-4-20250514
 - **Hosting:** Railway
 - **Database:** Supabase (optional)
 - **Team Hub:** Notion (optional)
@@ -147,4 +146,4 @@ project-darwin/
 
 ---
 
-Built for Heinrich Co. by Naqi · Project Darwin v2.0
+Built for Heinrich Co. by Naqi · Project Darwin v2.0 · Claude AI Integrated
