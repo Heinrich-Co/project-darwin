@@ -4,10 +4,13 @@ Loads environment variables and provides defaults.
 """
 
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
-
+# Always find .env relative to THIS file, not the working directory
+_project_root = Path(__file__).resolve().parent.parent
+_env_path = _project_root / ".env"
+load_dotenv(dotenv_path=_env_path)
 
 class Config:
     # Flask
