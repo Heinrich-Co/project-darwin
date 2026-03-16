@@ -1,21 +1,31 @@
 """
 Project Darwin — The Heinrich Co. Brain Model
-Main Flask application with all API endpoints.
+Main Flask application.
 
-Endpoints
----------
-GET  /                       Health check
-GET  /api/brand-rules        Get brand guidelines
-POST /api/validate           Validate content against brand
-POST /api/generate-brief     Skill #2 — Strategic brief
-POST /api/write-blog         Skill #3 — Blog post
-POST /api/create-social      Skill #4 — Social posts
-POST /api/design-visuals     Skill #5 — Design prompts
-POST /api/qualify-leads      Skill #6 — Lead qualification
-POST /api/track-engagement   Skill #6b — Engagement tracking
-POST /api/analytics-report   Skill #7 — Analytics report
-POST /api/linkedin-post      Skill #8 — LinkedIn post
-POST /api/full-pipeline      Full end-to-end pipeline
+CONTENT FLOW:
+  Skills generate → Staging → Camila reviews → Approved → Notion (team)
+
+ENDPOINTS:
+  GET  /                         Health check
+  GET  /api/brand-rules          Brand guidelines
+  POST /api/validate             Validate content
+  POST /api/generate-brief       Skill #2
+  POST /api/write-blog           Skill #3
+  POST /api/create-social        Skill #4
+  POST /api/design-visuals       Skill #5
+  POST /api/qualify-leads        Skill #6
+  POST /api/track-engagement     Skill #6b
+  POST /api/analytics-report     Skill #7
+  POST /api/linkedin-post        Skill #8
+  POST /api/full-pipeline        End-to-end
+  GET  /api/staging/pending      Pending review items
+  GET  /api/staging/all          All staged items
+  POST /api/staging/review       View staged content
+  POST /api/staging/approve      Approve → push to Notion
+  POST /api/staging/revise       Send back with feedback
+  POST /api/staging/refine       Claude rewrites based on feedback
+  GET  /api/staging/summary      Weekly summary
+  GET  /api/notion-status        Notion connection check
 """
 
 import os
@@ -28,240 +38,243 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env")
 
-from handlers import handler  # noqa: E402 (must be after load_dotenv)
+from handlers import handler  # noqa: E402
 
-# ---------------------------------------------------------------------------
-# App setup
-# ---------------------------------------------------------------------------
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-key")
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("darwin")
 
 
-# ---------------------------------------------------------------------------
-# Helper
-# ---------------------------------------------------------------------------
-def _json_error(msg: str, code: int = 400):
+def _err(msg, code=400):
     return jsonify({"status": "error", "message": msg}), code
 
 
-# ---------------------------------------------------------------------------
-# Health check
-# ---------------------------------------------------------------------------
+# === Health ===
 @app.route("/", methods=["GET"])
 def health():
     return jsonify({
         "status": "healthy",
         "project": "Project Darwin — The Heinrich Co. Brain Model",
-        "version": "2.0",
-        "skills": [
-            "1. Brand Guardian",
-            "2. Strategy Expert",
-            "3. Content Writer",
-            "4. Social Creator",
-            "5. Visual Designer",
-            "6. Lead Qualifier",
-            "7. Analytics Manager",
-            "8. LinkedIn Optimizer",
-        ],
+        "version": "3.0",
+        "content_flow": "Generate → Stage → Camila Reviews → Approve → Notion",
+        "skills": 8,
+        "endpoints": 19,
         "timestamp": datetime.now().isoformat(),
     })
 
 
-# ---------------------------------------------------------------------------
-# Brand Rules (GET)
-# ---------------------------------------------------------------------------
+# === Brand Rules ===
 @app.route("/api/brand-rules", methods=["GET"])
 def brand_rules():
     return jsonify({"status": "success", "rules": handler.get_brand_rules()})
 
 
-# ---------------------------------------------------------------------------
-# Validate Content (POST)
-# ---------------------------------------------------------------------------
+# === Validate ===
 @app.route("/api/validate", methods=["POST"])
-def validate_content():
-    data = request.get_json(silent=True) or {}
-    content = data.get("content", "")
-    content_type = data.get("content_type", "blog")
-    if not content:
-        return _json_error("'content' is required.")
-    result = handler.validate_content(content, content_type)
-    return jsonify({"status": "success", "validation": result})
+def validate():
+    d = request.get_json(silent=True) or {}
+    if not d.get("content"):
+        return _err("'content' required")
+    return jsonify({"status": "success", "validation": handler.validate_content(d["content"], d.get("content_type", "blog"))})
 
 
-# ---------------------------------------------------------------------------
-# Skill #2 — Generate Brief
-# ---------------------------------------------------------------------------
+# === Skill #2 ===
 @app.route("/api/generate-brief", methods=["POST"])
 def generate_brief():
-    data = request.get_json(silent=True) or {}
-    keyword = data.get("keyword", "")
-    if not keyword:
-        return _json_error("'keyword' is required.")
-    use_ai = data.get("use_ai", False)
+    d = request.get_json(silent=True) or {}
+    if not d.get("keyword"):
+        return _err("'keyword' required")
     try:
-        brief = handler.generate_brief(keyword, use_ai=use_ai)
-        return jsonify({"status": "success", "brief": brief})
+        return jsonify({"status": "success", "brief": handler.generate_brief(d["keyword"], d.get("use_ai", False))})
     except Exception as e:
         logger.exception("generate-brief failed")
-        return _json_error(str(e), 500)
+        return _err(str(e), 500)
 
 
-# ---------------------------------------------------------------------------
-# Skill #3 — Write Blog
-# ---------------------------------------------------------------------------
+# === Skill #3 ===
 @app.route("/api/write-blog", methods=["POST"])
 def write_blog():
-    data = request.get_json(silent=True) or {}
-    # Accept either a full brief object or a keyword
-    brief = data.get("brief")
+    d = request.get_json(silent=True) or {}
+    brief = d.get("brief")
     if not brief:
-        keyword = data.get("keyword", "")
-        if not keyword:
-            return _json_error("'brief' object or 'keyword' string is required.")
-        brief = handler.generate_brief(keyword)
-    use_ai = data.get("use_ai", False)
+        kw = d.get("keyword", "")
+        if not kw:
+            return _err("'brief' or 'keyword' required")
+        brief = handler.generate_brief(kw)
     try:
-        blog = handler.write_blog(brief, use_ai=use_ai)
-        return jsonify({"status": "success", "blog": blog})
+        return jsonify({"status": "success", "blog": handler.write_blog(brief, d.get("use_ai", False))})
     except Exception as e:
         logger.exception("write-blog failed")
-        return _json_error(str(e), 500)
+        return _err(str(e), 500)
 
 
-# ---------------------------------------------------------------------------
-# Skill #4 — Create Social Posts
-# ---------------------------------------------------------------------------
+# === Skill #4 ===
 @app.route("/api/create-social", methods=["POST"])
 def create_social():
-    data = request.get_json(silent=True) or {}
-    blog_data = data.get("blog_data", data)
-    platform = data.get("platform", "linkedin")
-    campaign = data.get("campaign", "consulting_services")
-    content_format = data.get("format", "static")
-    use_ai = data.get("use_ai", False)
+    d = request.get_json(silent=True) or {}
     try:
-        posts = handler.create_social(blog_data, platform, campaign, content_format, use_ai)
-        return jsonify({"status": "success", "social": posts})
+        return jsonify({"status": "success", "social": handler.create_social(
+            d.get("blog_data", d), d.get("platform", "linkedin"),
+            d.get("campaign", "consulting_services"), d.get("format", "static"), d.get("use_ai", False))})
     except Exception as e:
         logger.exception("create-social failed")
-        return _json_error(str(e), 500)
+        return _err(str(e), 500)
 
 
-# ---------------------------------------------------------------------------
-# Skill #5 — Design Visuals
-# ---------------------------------------------------------------------------
+# === Skill #5 ===
 @app.route("/api/design-visuals", methods=["POST"])
 def design_visuals():
-    data = request.get_json(silent=True) or {}
-    blog_data = data.get("blog_data", data)
+    d = request.get_json(silent=True) or {}
     try:
-        prompts = handler.design_visuals(blog_data)
-        return jsonify({"status": "success", "designs": prompts})
+        return jsonify({"status": "success", "designs": handler.design_visuals(d.get("blog_data", d))})
     except Exception as e:
-        logger.exception("design-visuals failed")
-        return _json_error(str(e), 500)
+        return _err(str(e), 500)
 
 
-# ---------------------------------------------------------------------------
-# Skill #6 — Qualify Leads
-# ---------------------------------------------------------------------------
+# === Skill #6 ===
 @app.route("/api/qualify-leads", methods=["POST"])
 def qualify_leads():
-    data = request.get_json(silent=True) or {}
-    leads = data.get("leads", [])
-    if not leads:
-        return _json_error("'leads' array is required.")
+    d = request.get_json(silent=True) or {}
+    if not d.get("leads"):
+        return _err("'leads' array required")
     try:
-        result = handler.qualify_leads(leads)
-        return jsonify({"status": "success", "qualification": result})
+        return jsonify({"status": "success", "qualification": handler.qualify_leads(d["leads"])})
     except Exception as e:
-        logger.exception("qualify-leads failed")
-        return _json_error(str(e), 500)
+        return _err(str(e), 500)
 
 
-# ---------------------------------------------------------------------------
-# Skill #6b — Track Engagement
-# ---------------------------------------------------------------------------
 @app.route("/api/track-engagement", methods=["POST"])
 def track_engagement():
-    data = request.get_json(silent=True) or {}
-    lead_id = data.get("lead_id", "")
-    event_type = data.get("event_type", "")
-    if not lead_id or not event_type:
-        return _json_error("'lead_id' and 'event_type' are required.")
-    try:
-        result = handler.track_engagement(lead_id, event_type)
-        return jsonify({"status": "success", "engagement": result})
-    except Exception as e:
-        logger.exception("track-engagement failed")
-        return _json_error(str(e), 500)
+    d = request.get_json(silent=True) or {}
+    if not d.get("lead_id") or not d.get("event_type"):
+        return _err("'lead_id' and 'event_type' required")
+    return jsonify({"status": "success", "engagement": handler.track_engagement(d["lead_id"], d["event_type"])})
 
 
-# ---------------------------------------------------------------------------
-# Skill #7 — Analytics Report
-# ---------------------------------------------------------------------------
+# === Skill #7 ===
 @app.route("/api/analytics-report", methods=["POST"])
 def analytics_report():
-    data = request.get_json(silent=True) or {}
+    d = request.get_json(silent=True) or {}
     try:
-        report = handler.analytics_report(data)
-        return jsonify({"status": "success", "report": report})
+        return jsonify({"status": "success", "report": handler.analytics_report(d)})
     except Exception as e:
-        logger.exception("analytics-report failed")
-        return _json_error(str(e), 500)
+        return _err(str(e), 500)
 
 
-# ---------------------------------------------------------------------------
-# Skill #8 — LinkedIn Post
-# ---------------------------------------------------------------------------
+# === Skill #8 ===
 @app.route("/api/linkedin-post", methods=["POST"])
 def linkedin_post():
-    data = request.get_json(silent=True) or {}
-    pillar = data.get("pillar", "")
-    if not pillar:
-        return _json_error("'pillar' is required. Options: structural_intelligence, leadership_mindset, culture_future_work, community_connection")
-    topic = data.get("topic")
-    use_ai = data.get("use_ai", False)
+    d = request.get_json(silent=True) or {}
+    if not d.get("pillar"):
+        return _err("'pillar' required")
     try:
-        post = handler.linkedin_post(pillar, topic, use_ai=use_ai)
+        post = handler.linkedin_post(d["pillar"], d.get("topic"), d.get("use_ai", False))
         if "error" in post:
-            return _json_error(post["error"])
+            return _err(post["error"])
         return jsonify({"status": "success", "post": post})
     except Exception as e:
-        logger.exception("linkedin-post failed")
-        return _json_error(str(e), 500)
+        return _err(str(e), 500)
 
 
-# ---------------------------------------------------------------------------
-# Full Pipeline — End-to-End
-# ---------------------------------------------------------------------------
+# === Full Pipeline ===
 @app.route("/api/full-pipeline", methods=["POST"])
 def full_pipeline():
-    data = request.get_json(silent=True) or {}
-    keyword = data.get("keyword", "")
-    if not keyword:
-        return _json_error("'keyword' is required.")
-    platform = data.get("platform", "linkedin")
-    campaign = data.get("campaign", "consulting_services")
-    use_ai = data.get("use_ai", False)
+    d = request.get_json(silent=True) or {}
+    if not d.get("keyword"):
+        return _err("'keyword' required")
     try:
-        result = handler.full_pipeline(keyword, platform, campaign, use_ai)
-        return jsonify({"status": "success", "pipeline": result})
+        return jsonify({"status": "success", "pipeline": handler.full_pipeline(
+            d["keyword"], d.get("platform", "linkedin"),
+            d.get("campaign", "consulting_services"), d.get("use_ai", False))})
     except Exception as e:
         logger.exception("full-pipeline failed")
-        return _json_error(str(e), 500)
+        return _err(str(e), 500)
 
 
-# ---------------------------------------------------------------------------
-# Run
-# ---------------------------------------------------------------------------
+# =====================================================================
+# STAGING — Camila's Review & Approval System
+# =====================================================================
+
+@app.route("/api/staging/pending", methods=["GET"])
+def staging_pending():
+    """List all content waiting for Camila's review."""
+    return jsonify({"status": "success", "review_queue": handler.get_pending_review()})
+
+
+@app.route("/api/staging/all", methods=["GET"])
+def staging_all():
+    """List all staged content (optional ?status= filter)."""
+    status = request.args.get("status")
+    return jsonify({"status": "success", "staged": handler.get_all_staged(status)})
+
+
+@app.route("/api/staging/review", methods=["POST"])
+def staging_review():
+    """View full content of a staged item."""
+    d = request.get_json(silent=True) or {}
+    if not d.get("file"):
+        return _err("'file' (staging filename) required")
+    content = handler.review_content(d["file"])
+    if "error" in content:
+        return _err(content["error"], 404)
+    return jsonify({"status": "success", "content": content})
+
+
+@app.route("/api/staging/approve", methods=["POST"])
+def staging_approve():
+    """Approve content → push to Notion for team."""
+    d = request.get_json(silent=True) or {}
+    if not d.get("file"):
+        return _err("'file' required")
+    result = handler.approve_and_push(d["file"])
+    if "error" in result:
+        return _err(result["error"], 404)
+    return jsonify({"status": "success", "approval": result})
+
+
+@app.route("/api/staging/revise", methods=["POST"])
+def staging_revise():
+    """Send content back for revision with feedback."""
+    d = request.get_json(silent=True) or {}
+    if not d.get("file") or not d.get("feedback"):
+        return _err("'file' and 'feedback' required")
+    result = handler.send_for_revision(d["file"], d["feedback"])
+    if "error" in result:
+        return _err(result["error"], 404)
+    return jsonify({"status": "success", "revision": result})
+
+
+@app.route("/api/staging/refine", methods=["POST"])
+def staging_refine():
+    """Claude rewrites content based on Camila's feedback."""
+    d = request.get_json(silent=True) or {}
+    if not d.get("file") or not d.get("feedback"):
+        return _err("'file' and 'feedback' required")
+    try:
+        result = handler.refine_staged_content(d["file"], d["feedback"])
+        if "error" in result:
+            return _err(result["error"], 404)
+        return jsonify({"status": "success", "refined": result})
+    except Exception as e:
+        return _err(str(e), 500)
+
+
+@app.route("/api/staging/summary", methods=["GET"])
+def staging_summary():
+    """Weekly summary — how many items pending, approved, revised."""
+    return jsonify({"status": "success", "summary": handler.weekly_summary()})
+
+
+# === Notion Status ===
+@app.route("/api/notion-status", methods=["GET"])
+def notion_status():
+    from integrations.notion_sync import check_connection
+    return jsonify({"status": "success", "notion": check_connection()})
+
+
+# === Run ===
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
