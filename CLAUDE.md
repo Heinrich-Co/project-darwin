@@ -1,4 +1,4 @@
-# Project Darwin — Claude Cowork Instructions
+# Project Darwin - Claude Cowork Instructions
  
 ## What This System Does
 Project Darwin generates marketing content (briefs, blogs, social posts, design prompts, LinkedIn posts) using 8 AI skills. All generated content is saved in the Google Drive staging folder for review before publishing to Notion.
