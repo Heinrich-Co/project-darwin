@@ -1,7 +1,19 @@
-# Project Darwin — Claude Cowork Instructions
+# Project Darwin - Claude Cowork Instructions
 
 ## What This System Does
 Project Darwin generates marketing content (briefs, blogs, social posts, design prompts, LinkedIn posts) using 8 AI skills. All generated content is saved in the `/staging` folder for review before publishing.
+
+## Notion Database IDs (Project Darwin Workspace)
+
+When pushing approved content to Notion, use these exact database IDs:
+
+- **Content Briefs** → Database ID: 326f9b0d23a880bf8e28ee4f9c1895a7
+- **Blog Posts** → Database ID: 326f9b0d23a880c781a7fbe1a53252a0
+- **Social Posts** → Database ID: 326f9b0d23a880a3a415c48f08993279
+- **Leads** → Database ID: 326f9b0d23a8804d87f7efa29e3a3378
+- **Analytics Reports** → Database ID: 326f9b0d23a8802582bbcea69847ae92
+
+All databases live under the "Project Darwin" page in the company Notion workspace.
 
 ## How to Review Content
 
@@ -22,10 +34,10 @@ When asked to review a specific item, read the full JSON file and present the co
 
 ### Approve Content
 When told to approve, update the JSON file's status to `"approved"` and push the content to Notion using the Notion MCP:
-- **Briefs** → Create in "Content Briefs" database
-- **Blogs** → Create in "Blog Posts" database with full content in page body
-- **Social** → Create one entry per post in "Social Posts" database
-- **LinkedIn** → Create in "Social Posts" database as LinkedIn type
+- **Briefs** → Create in "Content Briefs" database → ID: 326f9b0d23a880bf8e28ee4f9c1895a7
+- **Blogs** → Create in "Blog Posts" database with full content in page body → ID: 326f9b0d23a880c781a7fbe1a53252a0
+- **Social** → Create one entry per post in "Social Posts" database → ID: 326f9b0d23a880a3a415c48f08993279
+- **LinkedIn** → Create in "Social Posts" database as LinkedIn type → ID: 326f9b0d23a880a3a415c48f08993279
 
 ### Refine Content
 When feedback is given (e.g., "make it more direct"), rewrite the content following the feedback while maintaining Heinrich Co. brand voice: corporate, direct, precise, executive. Show the updated version for approval.
