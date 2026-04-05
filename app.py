@@ -28,6 +28,66 @@ ENDPOINTS:
   GET  /api/notion-status        Notion connection check
 """
 
+
+"""
+Project Darwin — The Heinrich Co. Brain Model
+Main Flask application.
+
+CONTENT FLOW:
+  Skills generate → Staging → Camila reviews → Approved → Notion (team)
+
+ENDPOINTS:
+  GET  /                         Health check
+  GET  /api/brand-rules          Brand guidelines
+  POST /api/validate             Validate content
+  POST /api/generate-brief       Skill #2
+  POST /api/write-blog           Skill #3
+  POST /api/create-social        Skill #4
+  POST /api/design-visuals       Skill #5
+  POST /api/qualify-leads        Skill #6
+  POST /api/track-engagement     Skill #6b
+  POST /api/analytics-report     Skill #7
+  POST /api/linkedin-post        Skill #8
+  POST /api/full-pipeline        End-to-end
+  GET  /api/staging/pending      Pending review items
+  GET  /api/staging/all          All staged items
+  POST /api/staging/review       View staged content
+  POST /api/staging/approve      Approve → push to Notion
+  POST /api/staging/revise       Send back with feedback
+  POST /api/staging/refine       Claude rewrites based on feedback
+  GET  /api/staging/summary      Weekly summary
+  GET  /api/notion-status        Notion connection check
+"""
+"""
+Project Darwin — The Heinrich Co. Brain Model
+Main Flask application.
+
+CONTENT FLOW:
+  Skills generate → Staging → Camila reviews → Approved → Notion (team)
+
+ENDPOINTS:
+  GET  /                         Health check
+  GET  /api/brand-rules          Brand guidelines
+  POST /api/validate             Validate content
+  POST /api/generate-brief       Skill #2
+  POST /api/write-blog           Skill #3
+  POST /api/create-social        Skill #4
+  POST /api/design-visuals       Skill #5
+  POST /api/qualify-leads        Skill #6
+  POST /api/track-engagement     Skill #6b
+  POST /api/analytics-report     Skill #7
+  POST /api/linkedin-post        Skill #8
+  POST /api/full-pipeline        End-to-end
+  GET  /api/staging/pending      Pending review items
+  GET  /api/staging/all          All staged items
+  POST /api/staging/review       View staged content
+  POST /api/staging/approve      Approve → push to Notion
+  POST /api/staging/revise       Send back with feedback
+  POST /api/staging/refine       Claude rewrites based on feedback
+  GET  /api/staging/summary      Weekly summary
+  GET  /api/notion-status        Notion connection check
+"""
+
 import os
 import logging
 from datetime import datetime
@@ -274,7 +334,223 @@ def notion_status():
     return jsonify({"status": "success", "notion": check_connection()})
 
 
+# =====================================================================
+# SCALE 1: AUTOMATION — Batch Pipeline & Scheduling
+# =====================================================================
+
+@app.route("/api/automation/run", methods=["POST"])
+def automation_run():
+    """Run batch content pipeline for next N keywords."""
+    d = request.get_json(silent=True) or {}
+    try:
+        from automation.batch_pipeline import run_batch
+        count = d.get("count", 5)
+        result = run_batch(count=count, use_ai=d.get("use_ai", True))
+        return jsonify({"status": "success", "batch": result})
+    except Exception as e:
+        return _err(str(e), 500)
+
+
+@app.route("/api/automation/status", methods=["GET"])
+def automation_status():
+    """Get automation pipeline status."""
+    try:
+        from automation.batch_pipeline import get_batch_status
+        return jsonify({"status": "success", "automation": get_batch_status()})
+    except Exception as e:
+        return _err(str(e), 500)
+
+
+@app.route("/api/automation/schedule", methods=["GET"])
+def automation_schedule():
+    """Get scheduler status and upcoming runs."""
+    try:
+        from automation.scheduler import scheduler
+        return jsonify({"status": "success", "scheduler": scheduler.get_status()})
+    except Exception as e:
+        return _err(str(e), 500)
+
+
+@app.route("/api/webhook/n8n", methods=["POST"])
+def n8n_webhook():
+    """Webhook endpoint for n8n automation platform."""
+    d = request.get_json(silent=True) or {}
+    try:
+        from automation.scheduler import handle_n8n_webhook
+        result = handle_n8n_webhook(d)
+        return jsonify({"status": "success", "result": result})
+    except Exception as e:
+        return _err(str(e), 500)
+
+
+# =====================================================================
+# SCALE 2: REVENUE ATTRIBUTION
+# =====================================================================
+
+@app.route("/api/attribution/record-content", methods=["POST"])
+def attr_record_content():
+    """Record content creation for attribution."""
+    d = request.get_json(silent=True) or {}
+    try:
+        from analytics.attribution import record_content
+        result = record_content(
+            keyword=d.get("keyword", ""),
+            content_type=d.get("content_type", "blog"),
+            content_id=d.get("content_id", ""),
+            title=d.get("title", ""),
+            views=d.get("views", 0),
+            engagement=d.get("engagement", 0.0),
+        )
+        return jsonify({"status": "success", "attribution": result})
+    except Exception as e:
+        return _err(str(e), 500)
+
+
+@app.route("/api/attribution/record-lead", methods=["POST"])
+def attr_record_lead():
+    """Record lead and attribute to content."""
+    d = request.get_json(silent=True) or {}
+    try:
+        from analytics.attribution import record_lead
+        result = record_lead(
+            lead_name=d.get("lead_name", ""),
+            content_id=d.get("content_id", ""),
+            source=d.get("source", "organic"),
+            score=d.get("score", 5),
+            company=d.get("company", ""),
+        )
+        return jsonify({"status": "success", "attribution": result})
+    except Exception as e:
+        return _err(str(e), 500)
+
+
+@app.route("/api/attribution/record-deal", methods=["POST"])
+def attr_record_deal():
+    """Record deal and attribute to lead chain."""
+    d = request.get_json(silent=True) or {}
+    try:
+        from analytics.attribution import record_deal
+        result = record_deal(
+            deal_id=d.get("deal_id", ""),
+            lead_name=d.get("lead_name", ""),
+            value=d.get("value", 0),
+            status=d.get("status", "proposal"),
+        )
+        return jsonify({"status": "success", "attribution": result})
+    except Exception as e:
+        return _err(str(e), 500)
+
+
+@app.route("/api/attribution/keyword-roi/<keyword>", methods=["GET"])
+def attr_keyword_roi(keyword):
+    """Get ROI for a specific keyword."""
+    try:
+        from analytics.attribution import get_keyword_roi
+        return jsonify({"status": "success", "roi": get_keyword_roi(keyword)})
+    except Exception as e:
+        return _err(str(e), 500)
+
+
+@app.route("/api/attribution/report", methods=["GET"])
+def attr_report():
+    """Full attribution report across all keywords."""
+    try:
+        from analytics.attribution import get_full_attribution_report
+        return jsonify({"status": "success", "report": get_full_attribution_report()})
+    except Exception as e:
+        return _err(str(e), 500)
+
+
+@app.route("/api/attribution/journey/<lead_name>", methods=["GET"])
+def attr_journey(lead_name):
+    """Trace a lead's full journey."""
+    try:
+        from analytics.attribution import get_content_journey
+        return jsonify({"status": "success", "journey": get_content_journey(lead_name)})
+    except Exception as e:
+        return _err(str(e), 500)
+
+
+# =====================================================================
+# SCALE 3: PERFORMANCE INTELLIGENCE
+# =====================================================================
+
+@app.route("/api/performance/ingest", methods=["POST"])
+def perf_ingest():
+    """Ingest GA4 page data for performance tracking."""
+    d = request.get_json(silent=True) or {}
+    try:
+        from analytics.performance import ingest_ga4_data
+        result = ingest_ga4_data(d.get("pages", []))
+        return jsonify({"status": "success", "performance": result})
+    except Exception as e:
+        return _err(str(e), 500)
+
+
+@app.route("/api/performance/recommendations", methods=["GET"])
+def perf_recommendations():
+    """Get AI-powered content recommendations."""
+    try:
+        from analytics.performance import get_content_recommendations
+        return jsonify({"status": "success", "recommendations": get_content_recommendations()})
+    except Exception as e:
+        return _err(str(e), 500)
+
+
+@app.route("/api/performance/keyword/<keyword>", methods=["GET"])
+def perf_keyword(keyword):
+    """Get performance data for a keyword."""
+    try:
+        from analytics.performance import get_keyword_performance
+        return jsonify({"status": "success", "performance": get_keyword_performance(keyword)})
+    except Exception as e:
+        return _err(str(e), 500)
+
+
+@app.route("/api/performance/snapshot", methods=["GET"])
+def perf_snapshot():
+    """Generate weekly performance snapshot."""
+    try:
+        from analytics.performance import get_weekly_snapshot
+        return jsonify({"status": "success", "snapshot": get_weekly_snapshot()})
+    except Exception as e:
+        return _err(str(e), 500)
+
+
+# =====================================================================
+# SCALE 4: SALES FUNNEL DASHBOARD
+# =====================================================================
+
+@app.route("/api/dashboard/funnel", methods=["GET"])
+def dashboard_funnel():
+    """Generate sales funnel dashboard HTML."""
+    try:
+        from dashboard.funnel import generate_dashboard
+        html = generate_dashboard()
+        return html, 200, {"Content-Type": "text/html"}
+    except Exception as e:
+        return _err(str(e), 500)
+
+
+@app.route("/api/dashboard/data", methods=["GET"])
+def dashboard_data():
+    """Get raw dashboard data as JSON."""
+    try:
+        from dashboard.funnel import _get_sample_data
+        return jsonify({"status": "success", "dashboard": _get_sample_data()})
+    except Exception as e:
+        return _err(str(e), 500)
+
+
 # === Run ===
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
+    # Start scheduler in background (optional)
+    try:
+        from automation.scheduler import scheduler as content_scheduler
+        if os.getenv("ENABLE_SCHEDULER", "false").lower() == "true":
+            content_scheduler.start()
+            logger.info("Content scheduler started")
+    except Exception:
+        pass
     app.run(host="0.0.0.0", port=port, debug=False)
