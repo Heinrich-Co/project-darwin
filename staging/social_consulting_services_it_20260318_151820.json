@@ -1,0 +1,32 @@
+{
+  "id": "social_consulting_services_it_20260318_151820",
+  "type": "social",
+  "keyword": "consulting services it",
+  "status": "pending_review",
+  "created_at": "2026-03-18T15:18:20.369202",
+  "reviewed_at": null,
+  "approved_at": null,
+  "pushed_to_notion_at": null,
+  "revision_feedback": null,
+  "data": {
+    "platform": "linkedin",
+    "campaign": "consulting_services",
+    "keyword": "consulting services it",
+    "format": "static",
+    "posts": [
+      {
+        "type": "static",
+        "copy": "50% of IT projects fail. Strategy is the difference.\n\nAfter working with enterprises across 40+ countries over 15 years, one pattern is clear:\n\nThe organizations that succeed with consulting services it aren't the ones with the biggest budgets.\nThey're the ones with the clearest strategy.\n\nIn our latest guide, we break down:\n\u2022 The 5-phase framework proven at scale\n\u2022 Real metrics: 300-400% ROI in Year 1\n\u2022 Why 50% of IT projects fail (and how to be in the other 50%)\n\nRead the full guide: [LINK]\n\nWhat's the biggest challenge you've faced with consulting services it? Share below \ud83d\udc47\n\n#AITransformation #EnterpriseStrategy #DigitalTransformation #HeinrichCo #CTO",
+        "hashtags": 5,
+        "cta": "soft"
+      },
+      {
+        "type": "carousel",
+        "copy": "CAROUSEL: Consulting Services It: Complete Implementation Guide for Enterprise Leaders\n\nSlide 1 (HOOK): 50% of IT projects fail. Strategy is the difference.\nSlide 2: The problem \u2014 50% of projects fail\nSlide 3: Phase 1-2 \u2014 Discovery & Strategy\nSlide 4: Phase 3-4 \u2014 Validation & Implementation\nSlide 5: Phase 5 \u2014 Optimization & Results\nSlide 6: Real results \u2014 400% ROI case study\nSlide 7 (CTA): Schedule your assessment \u2192 [LINK]\n\nCaption: 50% of IT projects fail. Strategy is the difference. Swipe to see how we help enterprises transform.\n\n#Consulting #Strategy #DigitalTransformation #HeinrichCo",
+        "slides": 7,
+        "cta": "direct"
+      }
+    ],
+    "created_at": "2026-03-18T15:18:20.366123"
+  }
+}

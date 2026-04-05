@@ -1,0 +1,50 @@
+{
+  "id": "designs_consulting_services_it_20260318_151820",
+  "type": "designs",
+  "keyword": "consulting services it",
+  "status": "pending_review",
+  "created_at": "2026-03-18T15:18:20.375775",
+  "reviewed_at": null,
+  "approved_at": null,
+  "pushed_to_notion_at": null,
+  "revision_feedback": null,
+  "data": {
+    "keyword": "consulting services it",
+    "title": "Consulting Services It: Complete Implementation Guide for Enterprise Leaders",
+    "design_prompts": {
+      "blog_featured_image": {
+        "dimensions": "1200x800",
+        "use": "Blog hero / featured image",
+        "prompt": "Professional split-screen infographic for 'Consulting Services It: Complete Implementation Guide for Enterprise Leaders'. LEFT side: Legacy chaos \u2014 old servers, tangled cables, stressed team. Dark grays and blacks. RIGHT side: Modern cloud \u2014 clean infrastructure, organized team, upward graphs. Brand colors: #1B1D1E and #CAD3AC. CENTER: Large forward arrow. Overlay metrics: '60% Faster', '$8M Savings', '99.95% Uptime'. Style: Enterprise-professional, high contrast, minimalist. Font: Work Sans SemiBold."
+      },
+      "instagram_carousel": {
+        "dimensions": "1080x1080",
+        "use": "Instagram carousel slide / social card",
+        "prompt": "Clean infographic: '5-Phase Consulting Framework'. 5 numbered boxes in a horizontal flow with subtle connecting arrows. 1. Discovery (magnifying glass icon) 2. Strategy (roadmap icon) 3. Validation (handshake icon) 4. Implementation (rocket icon) 5. Optimization (chart-up icon). Each box shows phase number, name, and duration. Background: #F2F2F2. Primary color: #1B1D1E. Accent: #CAD3AC. Style: Clean, minimal, enterprise. Font: Work Sans."
+      },
+      "linkedin_article_image": {
+        "dimensions": "1200x800",
+        "use": "LinkedIn post / article image",
+        "prompt": "ROI Dashboard mockup for 'consulting services it'. TOP: Title 'ROI Calculator \u2014 Consulting Services It'. KPI cards: Investment $500K | Year 1 Benefits $2M | ROI 400% | Payback 3 months. BOTTOM: Bar chart showing ROI growth over 3 years (Yr1: 300%, Yr2: 600%, Yr3: 1200%). Style: Modern SaaS dashboard. Colors: #1B1D1E background, #CAD3AC accent bars, #F2F2F2 text. Font: Work Sans."
+      },
+      "infographic": {
+        "dimensions": "1080x1080",
+        "use": "Data visualization / infographic",
+        "prompt": "Pie chart infographic: 'Why IT Projects Fail'. Segments: No Strategy 30% (red), Poor Change Mgmt 25% (orange), Wrong Vendor 20% (yellow), No Exec Support 15% (blue), No Risk Mgmt 10% (dark blue). Callout bubble: 'With professional consulting, failure risk drops to <5%'. Background: #F2F2F2. Style: Clean, data-focused, enterprise. Font: Work Sans."
+      },
+      "landing_page_hero": {
+        "dimensions": "1920x1080",
+        "use": "Website landing page hero section",
+        "prompt": "Landing page hero for 'Consulting Services It: Complete Implementation Guide for Enterprise Leaders'. Background: Gradient from #1B1D1E to dark navy. Main heading in #F2F2F2: 'Consulting Services It: Complete Implementation Guide for Enterprise Leaders'. Sub-heading: 'Transform Legacy Systems Into Competitive Advantages'. Right side: Diverse professional team in modern office, soft bokeh. Left side: Abstract cloud/network visualization with #CAD3AC nodes. Generous white space. Style: Minimalist cinematography, editorial. Font: Work Sans SemiBold."
+      }
+    },
+    "brand_colors": {
+      "deep_black": "#1B1D1E",
+      "off_white": "#F2F2F2",
+      "light_green": "#CAD3AC",
+      "grayish_beige": "#C1B9AD"
+    },
+    "notes": "Execute each prompt in Nano Banana. Export as PNG. Approx 30 min per image.",
+    "created_at": "2026-03-18T15:18:20.375612"
+  }
+}
